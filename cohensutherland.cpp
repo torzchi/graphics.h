@@ -1,11 +1,3 @@
-/*
-  Un obiect se deplaseaza pe o traiectorie rectilinie,
-  iar la trecerea printr-o zona predefinita
-  isi modifica culoarea conturului
-
-  (este exemplificata decuparea)
-*/
-
 #include <winbgim.h>
 #include <math.h>
 #define Nvf 4
@@ -215,7 +207,6 @@ return 1;
 }
 return 0;
 }
-
 
 
 
