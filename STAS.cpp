@@ -1,3 +1,23 @@
+#include <graphics.h>
+#include <iostream>
+#include <math.h>
+
+#define N 3
+#define NMAX 3
+#define PI 3.1415
+
+using namespace std;
+
+// desenarea (conversie real -> intreg)
+void desen(int n,double P[]);
+// inmultirea a doua matrici
+void inmult(double A[3][3],double B[3][3]);
+// inversarea unei matrici
+void invers(int n, double a[NMAX][NMAX],double eps,
+double b[NMAX][NMAX],double *det_a,
+int *err);
+
+
 int main()
 {
     initwindow(800,700);
@@ -25,24 +45,26 @@ int main()
 	double Ti2[3][3]; // matricea de Translatie inversa
 	double M2[3][3];
 
+	double P3[3][3]; // matricea varfurilor
+	double O3[3][3]; // matricea de Oglindire
+	double R3[3][3]; // matricea de Rotatie
+	double Ri3[3][3]; // matricea de Rotatie inversa
+	double T3[3][3]; // matricea de Translatie
+	double Ti3[3][3]; // matricea de Translatie inversa
+	double M3[3][3];
+
     int x1,y1,x2,y2; // dreapta
 	x1=300;y1=576;
 	x2=300;y2=161;
     d=sqrt(x1*x1+y1*y1);
 	sinu = (y2-y1)/d;
 	cosu = (x2-x1)/d;
-
-    //drawromb(X,Y+20,65);
-   // drawromb(X,Y-140,75);
-    //drawromb(X,Y-300,65);;
-
     int poligon[128];    // valori corespunzatoare dispozitivului de afisare
     double points[128];  // valori reale (utilizate in tansform geometrice)
 
     int RR = 95;
     double alfa = 2*PI/N;
     //constructie poligon
-
     for(int i=0;i<N+1;i++){
         points[2*i]   = RR*cos(i*alfa);
         points[2*i+1] = RR*sin(i*alfa);
@@ -120,6 +142,154 @@ int main()
     poligon[2*N]=poligon[0];poligon[2*N+1]=poligon[1];
 
     drawpoly(4,poligon); // desenez triunghiul in poz finala oglindita
+
+    //Triunghiul de jos
+    //coordonate obtinute cu ajutorul functiei getMouseCoordinates
+    double poligon2[]={293,445,116,358,160,510,293,445};    // valori corespunzatoare dispozitivului de afisare
+    //double points2[128];  // valori reale (utilizate in tansform geometrice)
+
+   for(xc=0,i=0;i<3;i++) xc+=poligon2[2*i]; xc/=3;
+	for(yc=0,i=0;i<3;i++) yc+=poligon2[2*i+1]; yc/=3;
+	desen(N+1,poligon2);
+
+
+	for(int i=0;i<3;i++){
+		P2[i][0]=poligon2[2*i];
+		P2[i][1]=poligon2[2*i+1];
+		P2[i][2]=1;
+	}
+
+	// T - matricea de translatie
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    if(i==j) T2[i][j]=1; else T2[i][j]=0;
+    T2[2][0]=-x1;
+    T2[2][1]=-y1;
+
+	invers(3,T2,eps,Ti2,&d,&e);
+
+	//matricea de rotatie
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    R2[i][j]=0;
+    R2[0][0]=R2[1][1]=cosu;
+    R2[0][1]=-sinu;
+    R2[1][0]=sinu;
+    R2[2][2]=1;
+
+    // R - matricea de rotatie inversa
+    invers(3,R2,eps,Ri2,&d,&e);
+
+    // O - matricea de transformare de oglindire
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    if(i==j) O2[i][j]=1; else O2[i][j]=0;
+    O2[1][1]=-1; // oglindire fata de Ox
+
+    // M - matricea de transformare compusa
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    if(i==j) M2[i][j]=1;
+        else M2[i][j]=0;
+    inmult(M2,T2);
+    inmult(M2,R2);
+    inmult(M2,O2);
+    inmult(M2,Ri2);
+    inmult(M2,Ti2);
+
+    // se aplica matricea de transformare compusa
+    inmult(P2,M2);
+
+    // refac vectorul de noduri
+    for(i=0;i<N;i++){
+    poligon2[2*i] = P2[i][0];
+    poligon2[2*i+1] = P2[i][1];
+    }
+    poligon2[2*N]=poligon2[0];poligon2[2*N+1]=poligon2[1];
+
+    desen(N+1,poligon2); // desenez triunghiul in poz finala oglindita
+
+    //coordonate obtinute cu functia getMouseCoordinates
+    double poligon4[]={350,100,300,120,253,100,300,60,350,100};
+    desen(5,poligon4);
+
+    double poligon3[]={285,128,173,187,205,90,285,128}; // valori corespunzatoare dispozitivului de afisare
+
+    for(xc=0,i=0;i<3;i++) xc+=poligon3[2*i]; xc/=3;
+	for(yc=0,i=0;i<3;i++) yc+=poligon3[2*i+1]; yc/=3;
+	desen(N+1,poligon3);
+
+	for(int i=0;i<3;i++){
+		P3[i][0]=poligon3[2*i];
+		P3[i][1]=poligon3[2*i+1];
+		P3[i][2]=1;
+	}
+
+	// T - matricea de translatie
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    if(i==j) T3[i][j]=1; else T3[i][j]=0;
+    T3[2][0]=-x1;
+    T3[2][1]=-y1;
+
+	invers(3,T3,eps,Ti3,&d,&e);
+
+	//matricea de rotatie
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    R3[i][j]=0;
+    R3[0][0]=R3[1][1]=cosu;
+    R3[0][1]=-sinu;
+    R3[1][0]=sinu;
+    R3[2][2]=1;
+
+    // R - matricea de rotatie inversa
+    invers(3,R3,eps,Ri3,&d,&e);
+
+    // O - matricea de transformare de oglindire
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    if(i==j) O3[i][j]=1; else O3[i][j]=0;
+    O3[1][1]=-1; // oglindire fata de Ox
+
+    // M - matricea de transformare compusa
+    for(int i=0;i<3;i++)
+    for(int j=0;j<3;j++)
+    if(i==j) M3[i][j]=1;
+        else M3[i][j]=0;
+    inmult(M3,T3);
+    inmult(M3,R3);
+    inmult(M3,O3);
+    inmult(M3,Ri3);
+    inmult(M3,Ti3);
+
+    // se aplica matricea de transformare compusa
+    inmult(P3,M3);
+
+    // refac vectorul de noduri
+    for(i=0;i<N;i++){
+    poligon3[2*i] = P3[i][0];
+    poligon3[2*i+1] = P3[i][1];
+    }
+    poligon3[2*N]=poligon3[0];poligon3[2*N+1]=poligon3[1];
+
+    desen(N+1,poligon3); // desenez triunghiul in poz finala oglindita
+
+
+    double poligon5[]={285,575,285,630,315,630,315,575};
+    desen(4,poligon5);
+
+    setfillstyle(1,WHITE);
+    floodfill(299,125,WHITE);
+
+    //getMouseCoordinates();
+    //cand functia e folosita ce e dedesubt nu se mai deseneaza
+    //ar trebui folosita la final pentru a vedea tot
+
+    getch();
+
+    closegraph();
+    return 0;
 }
 
 // reprezentare poligon
