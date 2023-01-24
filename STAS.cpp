@@ -120,3 +120,93 @@ int main()
     poligon[2*N]=poligon[0];poligon[2*N+1]=poligon[1];
 
     drawpoly(4,poligon); // desenez triunghiul in poz finala oglindita
+}
+
+// reprezentare poligon
+void desen(int n,double poly[]){
+	int P[100];
+	for(int i=0;i<2*n+2;i++){
+		P[i]=(int)poly[i];
+	}
+	drawpoly(n,P);
+}
+
+// inmultirea a 2 matrici de 3 x 3 (coordonate omogene)
+void inmult(double A[3][3], double B[3][3]){
+	double X[3][3];
+	int i,j,k;
+	for(i=0;i<3;i++)
+	for(j=0;j<3;j++)
+	for(k=0,X[i][j]=0;k<3;k++)
+		X[i][j]=X[i][j]+A[i][k]*B[k][j];
+	for(i=0;i<3;i++)
+	for(j=0;j<3;j++)A[i][j]=X[i][j];
+}
+
+
+// calculeaza inversa unei matrici
+void invers(int n, double a[NMAX][NMAX],double eps,
+double b[NMAX][NMAX],double *det_a,
+int *err)
+{
+	int i,j,k,pozmax;
+	double amax,aux;
+	double X[NMAX][NMAX];
+	// copiez prima matrice
+	for(i=0;i<n;i++)
+	for(j=0;j<n;j++)
+		X[i][j]=a[i][j];
+	/* Initializarea matricei b cu matricea unitate */
+	for(i=0;i<n;i++)
+	for(j=0;j<n;j++)
+		if(i==j) b[i][j]=1.0;
+	else b[i][j]=0.0;
+	/* Initializarea determinantului */
+	*det_a=1.0;
+	/* Se face 0sub diagonala principala si 1 pe ea */
+	k=0; /*k=nr.liniei */
+	*err=0;
+	while((k<n) && (*err==0))
+	{
+		/*Calcul element pivot*/
+		amax=fabs(X[k][k]);pozmax=k;
+		for(i=k+1;i<n;i++)
+		if (fabs(X[i][k]) >amax) {
+			amax=fabs(X[i][k]);
+			pozmax=i;
+		};
+		/*Interschimbarea liniei k cu pozmax in matr. a si b */
+		if( k!=pozmax) {
+			for(j=0;j<n;j++){
+				aux=X[k][j];
+				X[k][j]=X[pozmax][j];
+				X[pozmax][j]=aux;
+				aux=b[k][j];
+				b[k][j]=b[pozmax][j];
+				b[pozmax][j]=aux;
+			};
+			*det_a=-*det_a;
+		};
+		if( fabs(X[k][k]) <eps) *err=1;
+		else {
+			*det_a =*det_a*X[k][k];
+			aux=X[k][k];
+			for(j=0;j<n;j++)
+			{
+				X[k][j]=X[k][j] / aux;
+				b[k][j]=b[k][j] / aux;
+			};
+			for(i=0;i<n;i++)
+				if(i!=k) {
+					aux=X[i][k];
+					for(j=0;j<n;j++)
+					{
+						X[i][j]=X[i][j]-X[k][j]*aux;
+						b[i][j]=b[i][j]-b[k][j]*aux;
+					}
+				}
+		}
+		k++;
+	}
+}
+
