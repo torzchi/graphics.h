@@ -101,8 +101,19 @@ void hex()
             }
 
 }
+delay(1000);
+ for(int i=0;i<N+1;i++){
+            points[2*i] = points[2*i]*0.9;
+            points[2*i+1]= points[2*i+1]*1.4;
+ }
+  points[12]=points[0];
+    points[13]=points[1];
+    for(int i=0;i<N;i++){
 
+                Line( points[2*i], points[2*i+1], points[2*i+2], points[2*i+3]);
 }
+}
+
 int main(){
  int x1,y1,x2,y2;
  initwindow(540,480);
